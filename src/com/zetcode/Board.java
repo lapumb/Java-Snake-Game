@@ -1,6 +1,7 @@
 package com.zetcode;
 
 import java.awt.Color;
+
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -17,12 +18,12 @@ import javax.swing.Timer;
 
 public class Board extends JPanel implements ActionListener {
 
-    private final int B_WIDTH = 300;
-    private final int B_HEIGHT = 300;
-    private final int DOT_SIZE = 10;
+    private final int B_WIDTH = 900;
+    private final int B_HEIGHT = 900;
+    private final int DOT_SIZE = 45;
     private final int ALL_DOTS = 900;
-    private final int RAND_POS = 29;
-    private final int DELAY = 140;
+    private final int RAND_POS = 20;
+    private int delay = 300;
 
     private final int x[] = new int[ALL_DOTS];
     private final int y[] = new int[ALL_DOTS];
@@ -50,7 +51,7 @@ public class Board extends JPanel implements ActionListener {
     private void initBoard() {
 
         addKeyListener(new TAdapter());
-        setBackground(Color.black);
+        setBackground(Color.white);
         setFocusable(true);
 
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
@@ -60,13 +61,13 @@ public class Board extends JPanel implements ActionListener {
 
     private void loadImages() {
 
-        ImageIcon iid = new ImageIcon("src/resources/dot.png");
+        ImageIcon iid = new ImageIcon("src/resources/sydney_head.png");
         ball = iid.getImage();
 
-        ImageIcon iia = new ImageIcon("src/resources/apple.png");
+        ImageIcon iia = new ImageIcon("src/resources/blake_apple.png");
         apple = iia.getImage();
 
-        ImageIcon iih = new ImageIcon("src/resources/head.png");
+        ImageIcon iih = new ImageIcon("src/resources/sydney_head.png");
         head = iih.getImage();
     }
 
@@ -81,7 +82,7 @@ public class Board extends JPanel implements ActionListener {
         
         locateApple();
 
-        timer = new Timer(DELAY, this);
+        timer = new Timer(delay, this);
         timer.start();
     }
 
@@ -114,26 +115,34 @@ public class Board extends JPanel implements ActionListener {
         }        
     }
 
+    //game over graphic
     private void gameOver(Graphics g) {
         
-        String msg = "Game Over";
-        Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = getFontMetrics(small);
+        String msg = "Game Over! You suck!";
+        Font large = new Font("Helvetica", Font.BOLD, 24);
+        FontMetrics metr = getFontMetrics(large);
 
-        g.setColor(Color.white);
-        g.setFont(small);
+        g.setColor(Color.blue);
+        g.setFont(large);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
     }
 
+    //checking if an apple is gained
     private void checkApple() {
 
         if ((x[0] == apple_x) && (y[0] == apple_y)) {
 
             dots++;
             locateApple();
+            
+            //making the game harder (faster) as apples are gained
+            if(timer.getDelay() > 10) {
+            	timer.setDelay(delay - 30);
+            }
         }
     }
 
+    //logic to move
     private void move() {
 
         for (int z = dots; z > 0; z--) {
@@ -158,6 +167,7 @@ public class Board extends JPanel implements ActionListener {
         }
     }
 
+    //checking if snake is out of bounds
     private void checkCollision() {
 
         for (int z = dots; z > 0; z--) {
@@ -188,6 +198,7 @@ public class Board extends JPanel implements ActionListener {
         }
     }
 
+    //replacing apple
     private void locateApple() {
 
         int r = (int) (Math.random() * RAND_POS);
@@ -197,6 +208,7 @@ public class Board extends JPanel implements ActionListener {
         apple_y = ((r * DOT_SIZE));
     }
 
+    //checking on action performed
     @Override
     public void actionPerformed(ActionEvent e) {
 
@@ -208,6 +220,7 @@ public class Board extends JPanel implements ActionListener {
         }
 
         repaint();
+
     }
 
     private class TAdapter extends KeyAdapter {
