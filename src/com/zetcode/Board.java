@@ -3,6 +3,7 @@ package com.zetcode;
 import java.awt.Color;
 
 import java.awt.Dimension;
+import java.awt.Rectangle; 
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -16,13 +17,33 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+/*
+ * @author janbodnar (GitHub user)
+ * @editor lapumb (forked)
+ * @date January 2019
+ * 
+ * This is a modified version of the 1970's 'snake' game. I am using Sydney's head to be the snake parts,
+ * and my own face to be the 'apples' she is seeking to eat. 
+ * 
+ * TODO add high scores
+ * TODO add a running timer
+ * TODO add a real 'game over' screen
+ * TODO main menu page
+ */
 public class Board extends JPanel implements ActionListener {
 
+	//sizing of board
     private final int B_WIDTH = 900;
     private final int B_HEIGHT = 900;
-    private final int DOT_SIZE = 45;
+    
+    //size of pictures
+    private final int DOT_SIZE = 50;
     private final int ALL_DOTS = 900;
-    private final int RAND_POS = 20;
+    
+    //random position element
+    private final int RAND_POS = 18;
+    
+    //initial delay in timer
     private int delay = 300;
 
     private final int x[] = new int[ALL_DOTS];
@@ -32,6 +53,7 @@ public class Board extends JPanel implements ActionListener {
     private int apple_x;
     private int apple_y;
 
+    //setting initial direction to go right
     private boolean leftDirection = false;
     private boolean rightDirection = true;
     private boolean upDirection = false;
@@ -43,11 +65,13 @@ public class Board extends JPanel implements ActionListener {
     private Image apple;
     private Image head;
 
+    //constructor
     public Board() {
         
         initBoard();
     }
     
+    //initializing board
     private void initBoard() {
 
         addKeyListener(new TAdapter());
@@ -59,6 +83,7 @@ public class Board extends JPanel implements ActionListener {
         initGame();
     }
 
+    //loading images from resources
     private void loadImages() {
 
         ImageIcon iid = new ImageIcon("src/resources/sydney_head.png");
@@ -71,6 +96,7 @@ public class Board extends JPanel implements ActionListener {
         head = iih.getImage();
     }
 
+    //initializing game
     private void initGame() {
 
         dots = 3;
@@ -86,6 +112,7 @@ public class Board extends JPanel implements ActionListener {
         timer.start();
     }
 
+    //painting images to screen
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -93,6 +120,7 @@ public class Board extends JPanel implements ActionListener {
         doDrawing(g);
     }
     
+    //helper to paint images on screen
     private void doDrawing(Graphics g) {
         
         if (inGame) {
@@ -130,14 +158,15 @@ public class Board extends JPanel implements ActionListener {
     //checking if an apple is gained
     private void checkApple() {
 
-        if ((x[0] == apple_x) && (y[0] == apple_y)) {
+        if (x[0] == apple_x && y[0] == apple_y) {
 
             dots++;
             locateApple();
             
             //making the game harder (faster) as apples are gained
-            if(timer.getDelay() > 10) {
-            	timer.setDelay(delay - 30);
+            if(timer.getDelay() > 1) {
+            	delay -= 30; 
+            	timer.setDelay(delay);
             }
         }
     }
@@ -198,7 +227,7 @@ public class Board extends JPanel implements ActionListener {
         }
     }
 
-    //replacing apple
+    //replacing apple, keeping them in play
     private void locateApple() {
 
         int r = (int) (Math.random() * RAND_POS);
@@ -222,7 +251,10 @@ public class Board extends JPanel implements ActionListener {
         repaint();
 
     }
-
+    
+    /*
+     * class to handle the key movements
+     */
     private class TAdapter extends KeyAdapter {
 
         @Override
