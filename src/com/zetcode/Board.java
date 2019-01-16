@@ -3,7 +3,6 @@ package com.zetcode;
 import java.awt.Color;
 
 import java.awt.Dimension;
-import java.awt.Rectangle; 
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -43,8 +42,12 @@ public class Board extends JPanel implements ActionListener {
     //random position element
     private final int RAND_POS = 18;
     
+    //one second in milliseconds
+    private final int SECOND = 1000; 
+    
     //initial delay in timer
     private int delay = 300;
+    private int currentTime; 
 
     private final int x[] = new int[ALL_DOTS];
     private final int y[] = new int[ALL_DOTS];
@@ -64,10 +67,13 @@ public class Board extends JPanel implements ActionListener {
     private Image ball;
     private Image apple;
     private Image head;
+    
+    long startTime; 
+    private Timer runningTimer; 
 
     //constructor
     public Board() {
-        
+    	startTime = System.currentTimeMillis();
         initBoard();
     }
     
@@ -110,6 +116,13 @@ public class Board extends JPanel implements ActionListener {
 
         timer = new Timer(delay, this);
         timer.start();
+        
+        ActionListener taskPerformer = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                currentTime += 1; 
+            }
+        };
+        new Timer(SECOND, taskPerformer).start();
     }
 
     //painting images to screen
@@ -117,12 +130,16 @@ public class Board extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+       
         doDrawing(g);
     }
     
     //helper to paint images on screen
     private void doDrawing(Graphics g) {
-        
+    	
+        //drawing time elapsed
+    	runningTimer(g);
+    	
         if (inGame) {
 
             g.drawImage(apple, apple_x, apple_y, this);
@@ -153,6 +170,18 @@ public class Board extends JPanel implements ActionListener {
         g.setColor(Color.blue);
         g.setFont(large);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
+    }
+    
+    //timer for how long you have been playing
+    private void runningTimer(Graphics g) {
+    	//currentTime += runningTimer.getDelay() / 1000;
+    	String time = "Time Elapsed: " + currentTime;
+    	Font small = new Font("Helvetica", Font.ITALIC, 20);
+    	FontMetrics metr = getFontMetrics(small);
+    	
+    	g.setColor(Color.BLACK);
+    	g.setFont(small);
+    	g.drawString(time, metr.stringWidth(time), metr.getHeight());
     }
 
     //checking if an apple is gained
