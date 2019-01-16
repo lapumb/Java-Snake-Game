@@ -25,7 +25,6 @@ import javax.swing.Timer;
  * and my own face to be the 'apples' she is seeking to eat. 
  * 
  * TODO add high scores
- * TODO add a running timer
  * TODO add a real 'game over' screen
  * TODO main menu page
  */
@@ -48,6 +47,9 @@ public class Board extends JPanel implements ActionListener {
     //initial delay in timer
     private int delay = 300;
     private int currentTime; 
+    
+    //number of apples gained
+    private int numApplesAquired; 
 
     private final int x[] = new int[ALL_DOTS];
     private final int y[] = new int[ALL_DOTS];
@@ -68,12 +70,9 @@ public class Board extends JPanel implements ActionListener {
     private Image apple;
     private Image head;
     
-    long startTime; 
-    private Timer runningTimer; 
 
     //constructor
     public Board() {
-    	startTime = System.currentTimeMillis();
         initBoard();
     }
     
@@ -139,6 +138,7 @@ public class Board extends JPanel implements ActionListener {
     	
         //drawing time elapsed
     	runningTimer(g);
+    	appleNumber(g); 
     	
         if (inGame) {
 
@@ -174,14 +174,24 @@ public class Board extends JPanel implements ActionListener {
     
     //timer for how long you have been playing
     private void runningTimer(Graphics g) {
-    	//currentTime += runningTimer.getDelay() / 1000;
-    	String time = "Time Elapsed: " + currentTime;
+    	String time = "Time Elapsed: " + currentTime + " seconds";
     	Font small = new Font("Helvetica", Font.ITALIC, 20);
     	FontMetrics metr = getFontMetrics(small);
     	
     	g.setColor(Color.BLACK);
     	g.setFont(small);
-    	g.drawString(time, metr.stringWidth(time), metr.getHeight());
+    	g.drawString(time, 10, metr.getHeight());
+    }
+    
+    //drawing the string for how many heads have been gained
+    private void appleNumber(Graphics g) {
+    	String num = "Apples Aquired: " + numApplesAquired; 
+    	Font number = new Font("Helvetica", Font.ITALIC, 20);
+    	FontMetrics metr = getFontMetrics(number); 
+    	
+    	g.setColor(Color.BLACK);
+    	g.setFont(number);
+    	g.drawString(num, B_WIDTH - metr.stringWidth(num) - 10, metr.getHeight());
     }
 
     //checking if an apple is gained
@@ -193,10 +203,12 @@ public class Board extends JPanel implements ActionListener {
             locateApple();
             
             //making the game harder (faster) as apples are gained
-            if(timer.getDelay() > 1) {
+            if(timer.getDelay() > 60) {
             	delay -= 30; 
             	timer.setDelay(delay);
             }
+            //incrementing num apples aquired
+            numApplesAquired++; 
         }
     }
 
