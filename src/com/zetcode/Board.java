@@ -1,5 +1,6 @@
 package com.zetcode;
 
+import java.awt.Button;
 import java.awt.Color;
 
 import java.awt.Dimension;
@@ -13,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -49,7 +51,7 @@ public class Board extends JPanel implements ActionListener {
     private int currentTime; 
     
     //number of apples gained
-    private int numApplesAquired; 
+    private int numApplesAcquired; 
 
     private final int x[] = new int[ALL_DOTS];
     private final int y[] = new int[ALL_DOTS];
@@ -70,6 +72,12 @@ public class Board extends JPanel implements ActionListener {
     private Image apple;
     private Image head;
     
+    //button for game-over page
+    JButton playAgain; 
+    
+    //string for button text
+    String replay = "Play Again"; 
+    
 
     //constructor
     public Board() {
@@ -79,6 +87,15 @@ public class Board extends JPanel implements ActionListener {
     //initializing board
     private void initBoard() {
 
+        inGame = true; 
+        numApplesAcquired = 0; 
+        currentTime = 0; 
+        leftDirection = false;
+        rightDirection = true;
+        upDirection = false;
+        downDirection = false;
+        inGame = true;
+        
         addKeyListener(new TAdapter());
         setBackground(Color.white);
         setFocusable(true);
@@ -122,6 +139,7 @@ public class Board extends JPanel implements ActionListener {
             }
         };
         new Timer(SECOND, taskPerformer).start();
+        
     }
 
     //painting images to screen
@@ -163,6 +181,12 @@ public class Board extends JPanel implements ActionListener {
     //game over graphic
     private void gameOver(Graphics g) {
         
+    	//button to retry
+    	playAgain = new JButton(replay);
+    	
+    	//font for button
+    	Font btn = new Font("Helvetica", Font.PLAIN, 20);
+
         String msg = "Game Over! You suck!";
         Font large = new Font("Helvetica", Font.BOLD, 24);
         FontMetrics metr = getFontMetrics(large);
@@ -170,6 +194,12 @@ public class Board extends JPanel implements ActionListener {
         g.setColor(Color.blue);
         g.setFont(large);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
+        
+      //instantiating button for click
+    	playAgain.addActionListener(this);
+    	playAgain.setBounds((B_WIDTH - metr.stringWidth(replay)) / 2, B_HEIGHT/2 + (metr.getHeight()), 150, 50);
+    	playAgain.setFont(btn);
+    	this.add(playAgain); 
     }
     
     //timer for how long you have been playing
@@ -185,7 +215,7 @@ public class Board extends JPanel implements ActionListener {
     
     //drawing the string for how many heads have been gained
     private void appleNumber(Graphics g) {
-    	String num = "Apples Aquired: " + numApplesAquired; 
+    	String num = "Apples Aquired: " + numApplesAcquired; 
     	Font number = new Font("Helvetica", Font.ITALIC, 20);
     	FontMetrics metr = getFontMetrics(number); 
     	
@@ -207,8 +237,8 @@ public class Board extends JPanel implements ActionListener {
             	delay -= 30; 
             	timer.setDelay(delay);
             }
-            //incrementing num apples aquired
-            numApplesAquired++; 
+            //incrementing number of apples acquired
+            numApplesAcquired++; 
         }
     }
 
@@ -237,7 +267,7 @@ public class Board extends JPanel implements ActionListener {
         }
     }
 
-    //checking if snake is out of bounds
+    //checking if snake hits bounds
     private void checkCollision() {
 
         for (int z = dots; z > 0; z--) {
@@ -282,6 +312,8 @@ public class Board extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
+    	Object cause = e.getSource(); 
+    	
         if (inGame) {
 
             checkApple();
@@ -289,8 +321,14 @@ public class Board extends JPanel implements ActionListener {
             move();
         }
 
-        repaint();
+        
+        //restarting game if the play again button is pressed
+        if(cause == playAgain) {
+        	Snake.main(null);
 
+        }
+        
+        repaint();
     }
     
     /*
