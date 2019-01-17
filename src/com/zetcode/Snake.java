@@ -10,7 +10,7 @@ public class Snake extends JFrame {
         initUI();
     }
     
-    public void initUI() {
+    private void initUI() {
         
         add(new Board());
                

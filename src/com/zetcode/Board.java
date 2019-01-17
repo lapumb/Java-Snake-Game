@@ -1,8 +1,6 @@
 package com.zetcode;
 
-import java.awt.Button;
 import java.awt.Color;
-
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -13,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.prefs.Preferences;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -27,8 +27,7 @@ import javax.swing.Timer;
  * and my own face to be the 'apples' she is seeking to eat. 
  * 
  * TODO add high scores
- * TODO add a real 'game over' screen
- * TODO main menu page
+ * TODO deal with running timer issue
  */
 public class Board extends JPanel implements ActionListener {
 
@@ -40,32 +39,42 @@ public class Board extends JPanel implements ActionListener {
     private final int DOT_SIZE = 50;
     private final int ALL_DOTS = 900;
     
+    //size for buttons
+    private final int BTN_WIDTH = 150;
+    private final int BTN_HEIGHT = 50; 
+    
     //random position element
     private final int RAND_POS = 18;
     
     //one second in milliseconds
     private final int SECOND = 1000; 
     
-    //initial delay in timer
-    private int delay = 300;
-    private int currentTime; 
-    
-    //number of apples gained
-    private int numApplesAcquired; 
+  //string for playAgain button text
+    private final String REPLAY = "Play Again"; 
 
     private final int x[] = new int[ALL_DOTS];
     private final int y[] = new int[ALL_DOTS];
 
+    //initial number of dots, apple coordinates
     private int dots;
     private int apple_x;
     private int apple_y;
+    
+    //initial delay in timer
+    private int delay;
+    private int currentTime; 
 
     //setting initial direction to go right
-    private boolean leftDirection = false;
-    private boolean rightDirection = true;
-    private boolean upDirection = false;
-    private boolean downDirection = false;
-    private boolean inGame = true;
+    private boolean leftDirection;
+    private boolean rightDirection;
+    private boolean upDirection;
+    private boolean downDirection;
+    
+    //testing what is happening
+    private boolean inGame;
+    
+    //number of apples gained
+    private int numApplesAcquired; 
 
     private Timer timer;
     private Image ball;
@@ -73,35 +82,52 @@ public class Board extends JPanel implements ActionListener {
     private Image head;
     
     //button for game-over page
-    JButton playAgain; 
+    private JButton playAgain; 
     
-    //string for button text
-    String replay = "Play Again"; 
+    //current highest score
+    private int currentHighApples; 
+    private int currentHighTime; 
     
+    //saved preferences for scores
+	Preferences blakes; 
+	Preferences time;
 
     //constructor
     public Board() {
         initBoard();
     }
     
-    //initializing board
-    private void initBoard() {
-
-        inGame = true; 
-        numApplesAcquired = 0; 
+    //initializing all global variables
+    private void initVar() {
+    	delay = 300;
         currentTime = 0; 
+        
+        //starting direction variables
         leftDirection = false;
         rightDirection = true;
         upDirection = false;
         downDirection = false;
         inGame = true;
         
+        //initial number of dots, apple coordinate
+        dots = 0;
+        apple_x = 0;
+        apple_y = 0;
+        
+        //starting score of apples acquired
+        numApplesAcquired = 0; 
+    }
+    
+    //initializing board
+    private void initBoard() {
+    	    	
         addKeyListener(new TAdapter());
         setBackground(Color.white);
         setFocusable(true);
 
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         loadImages();
+        initVar(); 
         initGame();
     }
 
@@ -172,34 +198,80 @@ public class Board extends JPanel implements ActionListener {
 
             Toolkit.getDefaultToolkit().sync();
 
-        } else {
-
+        } 
+        
+        else {
             gameOver(g);
         }        
     }
 
     //game over graphic
     private void gameOver(Graphics g) {
-        
-    	//button to retry
-    	playAgain = new JButton(replay);
     	
-    	//font for button
-    	Font btn = new Font("Helvetica", Font.PLAIN, 20);
-
+    	//testing if new highscore
+    	//highScore(numApplesAcquired, currentTime); 
+    	//currentHighApples = blakes.getInt("highBlakes", 0); 
+    	//currentHighTime = time.getInt("highTime", 0); 
+    	
+    	//button to retry
+    	playAgain = new JButton(REPLAY);
+    	
+    	//strings to print
         String msg = "Game Over! You suck!";
+        String score = "Your Score: " + numApplesAcquired + " Blakes in "+ currentTime + " seconds";
+        String highestScore = "Your Highest Score: " + currentHighApples + " Blakes in " + currentHighTime + 
+        		" seconds";
+    	
+    	//font stuff
+    	Font btn = new Font("Helvetica", Font.PLAIN, 20);
         Font large = new Font("Helvetica", Font.BOLD, 24);
+        Font highscore = new Font("Helvetica", Font.BOLD, 26);
         FontMetrics metr = getFontMetrics(large);
+        FontMetrics measure = getFontMetrics(btn); 
+        FontMetrics measureHigh = getFontMetrics(highscore);
 
-        g.setColor(Color.blue);
+        //printing game over
+        g.setColor(Color.BLUE);
         g.setFont(large);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
         
-      //instantiating button for click
+      //instantiating play again button
     	playAgain.addActionListener(this);
-    	playAgain.setBounds((B_WIDTH - metr.stringWidth(replay)) / 2, B_HEIGHT/2 + (metr.getHeight()), 150, 50);
+    	playAgain.setBounds((B_WIDTH - BTN_WIDTH) / 2, 
+    			B_HEIGHT/2 + BTN_HEIGHT, BTN_WIDTH, BTN_HEIGHT);
     	playAgain.setFont(btn);
     	this.add(playAgain); 
+
+    	//printing score obtained
+    	g.setColor(Color.BLACK);
+    	g.setFont(btn);
+    	g.drawString(score, (B_WIDTH - measure.stringWidth(score)) / 2, 
+    			B_HEIGHT/2 + 3*(BTN_HEIGHT));
+    	
+    	//printing high score
+    	g.setColor(Color.MAGENTA);
+    	g.setFont(highscore);
+    	g.drawString(highestScore, (B_WIDTH - measureHigh.stringWidth(highestScore)) / 2, 
+    			B_HEIGHT/2 + 5*(BTN_HEIGHT));
+    }
+    
+    private void highScore(int numBlakes, int numTime) {
+    	blakes = Preferences.userNodeForPackage(this.getClass());
+    	blakes.putInt("highBlakes", 0);
+    	
+    	time = Preferences.userNodeForPackage(this.getClass());  
+    	time.putInt("highTime", 0);
+    	
+    	if(numBlakes > blakes.getInt("highBlakes", 0)) { 
+    		blakes.putInt("highBlakes", numBlakes);
+    		time.putInt("highTime", numTime);
+    	}
+    	
+    	else if(numBlakes == blakes.getInt("highBlakes", 0)) {
+    		if(numTime > time.getInt("highTime", 0)) {
+    			time.putInt("highTime", numTime);
+    		}
+    	}
     }
     
     //timer for how long you have been playing
@@ -215,7 +287,7 @@ public class Board extends JPanel implements ActionListener {
     
     //drawing the string for how many heads have been gained
     private void appleNumber(Graphics g) {
-    	String num = "Apples Aquired: " + numApplesAcquired; 
+    	String num = "Blakes Aquired: " + numApplesAcquired; 
     	Font number = new Font("Helvetica", Font.ITALIC, 20);
     	FontMetrics metr = getFontMetrics(number); 
     	
@@ -324,8 +396,10 @@ public class Board extends JPanel implements ActionListener {
         
         //restarting game if the play again button is pressed
         if(cause == playAgain) {
-        	Snake.main(null);
-
+        	//Snake.main(null);
+        	removeAll(); 
+        	this.revalidate(); 
+        	initBoard(); 
         }
         
         repaint();
