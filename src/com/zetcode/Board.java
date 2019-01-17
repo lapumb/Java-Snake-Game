@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.net.URL;
 import java.util.prefs.Preferences;
 
 import javax.swing.ImageIcon;
@@ -134,14 +135,17 @@ public class Board extends JPanel implements ActionListener {
     //loading images from resources
     private void loadImages() {
 
-        ImageIcon iid = new ImageIcon("src/resources/sydney_head.png");
+    	//receiving images
+    	URL urlh = Board.class.getResource("/sydney_head.png");
+        ImageIcon iid = new ImageIcon(urlh);
         ball = iid.getImage();
-
-        ImageIcon iia = new ImageIcon("src/resources/blake_apple.png");
-        apple = iia.getImage();
-
-        ImageIcon iih = new ImageIcon("src/resources/sydney_head.png");
+        
+        ImageIcon iih = new ImageIcon(urlh);
         head = iih.getImage();
+
+        URL urla = Board.class.getResource("/blake_apple.png");
+        ImageIcon iia = new ImageIcon(urla);
+        apple = iia.getImage();
     }
 
     //initializing game
