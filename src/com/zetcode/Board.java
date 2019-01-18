@@ -31,7 +31,7 @@ import javax.swing.Timer;
  * TODO deal with running timer issue
  */
 public class Board extends JPanel implements ActionListener {
-
+	
 	//sizing of board
     private final int B_WIDTH = 900;
     private final int B_HEIGHT = 900;
@@ -81,6 +81,9 @@ public class Board extends JPanel implements ActionListener {
     private Image ball;
     private Image apple;
     private Image head;
+    
+    //seconds timer
+    private Timer secTimer; 
     
     //button for game-over page
     private JButton playAgain; 
@@ -159,16 +162,18 @@ public class Board extends JPanel implements ActionListener {
         }
         
         locateApple();
-
-        timer = new Timer(delay, this);
-        timer.start();
         
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 currentTime += 1; 
+                System.out.println(currentTime);
             }
         };
-        new Timer(SECOND, taskPerformer).start();
+       
+        secTimer = new Timer(SECOND, taskPerformer);
+        timer = new Timer(delay, this);
+        timer.start();
+        secTimer.start();
         
     }
 
@@ -213,9 +218,9 @@ public class Board extends JPanel implements ActionListener {
     private void gameOver(Graphics g) {
     	
     	//testing if new highscore
-    	//highScore(numApplesAcquired, currentTime); 
-    	//currentHighApples = blakes.getInt("highBlakes", 0); 
-    	//currentHighTime = time.getInt("highTime", 0); 
+    	setHighScore(numApplesAcquired, currentTime); 
+    	currentHighApples = getHighBlakes(); 
+    	currentHighTime = getHighTime(); 
     	
     	//button to retry
     	playAgain = new JButton(REPLAY);
@@ -257,27 +262,41 @@ public class Board extends JPanel implements ActionListener {
     	g.setFont(highscore);
     	g.drawString(highestScore, (B_WIDTH - measureHigh.stringWidth(highestScore)) / 2, 
     			B_HEIGHT/2 + 5*(BTN_HEIGHT));
+    	
     }
     
-    private void highScore(int numBlakes, int numTime) {
-    	blakes = Preferences.userNodeForPackage(this.getClass());
-    	blakes.putInt("highBlakes", 0);
-    	
-    	time = Preferences.userNodeForPackage(this.getClass());  
-    	time.putInt("highTime", 0);
-    	
-    	if(numBlakes > blakes.getInt("highBlakes", 0)) { 
-    		blakes.putInt("highBlakes", numBlakes);
-    		time.putInt("highTime", numTime);
-    	}
-    	
-    	else if(numBlakes == blakes.getInt("highBlakes", 0)) {
-    		if(numTime > time.getInt("highTime", 0)) {
-    			time.putInt("highTime", numTime);
+    private void setHighScore(int numBlakes, int numTime) {
+    	Preferences prefs = Preferences.userNodeForPackage(this.getClass()); 
+    	Preferences secs = Preferences.userNodeForPackage(this.getClass()); 
+    	int score = prefs.getInt("blakes", 0); 
+    	int seconds = secs.getInt("seconds", 0); 
+    	if(score == 0) {
+    		if(seconds < numTime) {
+    			secs.putInt("seconds", numTime);
     		}
     	}
+    	if(score == numBlakes) {
+    		if(seconds < numTime) {
+    			secs.putInt("seconds", numTime);
+    		}
+    	}
+    	if(score < numBlakes) {
+    		prefs.putInt("blakes", numBlakes);
+    		secs.putInt("seconds", numTime);
+    	}
     }
     
+    private int getHighBlakes() {
+    	Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+    	int blake = prefs.getInt("blakes", 0); 
+    	return blake; 
+    }
+    
+    private int getHighTime() {
+    	Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+    	int time = prefs.getInt("seconds", 0); 
+    	return time; 
+    }
     //timer for how long you have been playing
     private void runningTimer(Graphics g) {
     	String time = "Time Elapsed: " + currentTime + " seconds";
@@ -371,6 +390,7 @@ public class Board extends JPanel implements ActionListener {
         
         if (!inGame) {
             timer.stop();
+            secTimer.stop();
         }
     }
 
@@ -396,8 +416,6 @@ public class Board extends JPanel implements ActionListener {
             checkCollision();
             move();
         }
-
-        
         //restarting game if the play again button is pressed
         if(cause == playAgain) {
         	//Snake.main(null);
