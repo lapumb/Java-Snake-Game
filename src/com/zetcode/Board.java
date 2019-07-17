@@ -27,14 +27,12 @@ import javax.swing.Timer;
  * This is a modified version of the 1970's 'snake' game. I am using Sydney's head to be the snake parts,
  * and my own face to be the 'apples' she is seeking to eat. 
  * 
- * TODO add high scores
- * TODO deal with running timer issue
  */
 public class Board extends JPanel implements ActionListener {
 	
 	//sizing of board
-    private final int B_WIDTH = 900;
-    private final int B_HEIGHT = 900;
+    private final int B_WIDTH = 700;
+    private final int B_HEIGHT = 700;
     
     //size of pictures
     private final int DOT_SIZE = 50;
@@ -45,7 +43,7 @@ public class Board extends JPanel implements ActionListener {
     private final int BTN_HEIGHT = 50; 
     
     //random position element
-    private final int RAND_POS = 18;
+    private final int RAND_POS = 14;
     
     //one second in milliseconds
     private final int SECOND = 1000; 
@@ -166,7 +164,6 @@ public class Board extends JPanel implements ActionListener {
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 currentTime += 1; 
-                System.out.println(currentTime);
             }
         };
        
@@ -258,7 +255,7 @@ public class Board extends JPanel implements ActionListener {
     			B_HEIGHT/2 + 3*(BTN_HEIGHT));
     	
     	//printing high score
-    	g.setColor(Color.MAGENTA);
+    	g.setColor(Color.BLACK);
     	g.setFont(highscore);
     	g.drawString(highestScore, (B_WIDTH - measureHigh.stringWidth(highestScore)) / 2, 
     			B_HEIGHT/2 + 5*(BTN_HEIGHT));
@@ -411,7 +408,6 @@ public class Board extends JPanel implements ActionListener {
     	Object cause = e.getSource(); 
     	
         if (inGame) {
-
             checkApple();
             checkCollision();
             move();
